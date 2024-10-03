@@ -1,6 +1,10 @@
 
-Questions = {
+{
   "Biology": [
+    "What if we could live for a million years?",
+    "What makes us human?",
+    "What if all viruses disappered?", 
+    "How did the life begin?",
     "Are gender traits completely a result of societal expectations?",
     "Are there any parts of the human body that get oxygen directly from the air and not from the blood?",
     "Are there nuclear reactions going on in our bodies?",
@@ -86,10 +90,11 @@ Questions = {
     "Why is lead used in pencils even though lead is poisonous?",
     "Why is mass conserved in chemical reactions?",
     "Why is plastic not used in home construction?",
-    "Why is propane stored in household tanks but natural gas is not?",
+    "Why is propane stored in household tanks but natural gas is not?"
   ],
 
   "Earth Science": [
+    "What if everyone on earth jumped at once?",
     "Can it rain fish?",
     "Can wind travel faster than the speed of sound?",
     "Clouds are just water vapor, so why do they move?",
@@ -133,6 +138,10 @@ Questions = {
   ],
 
   "Health": [
+    "How do we solve the population problem?",
+    "Can we live for ever?",
+    "What is consciousness?", 
+    "Why do we dream?",
     "Is mental illness really an illness? (January 8, 2024)",
     "How can I tell if I have depression or just normal sadness?",
     "Are any pills perfectly safe?",
@@ -175,6 +184,10 @@ Questions = {
   ],
 
   "Physics": [
+    "What would happen to us if Gravity stopped working?",
+    "What would happen if we nuked the moon?",
+    "Are we alone in the universe?",
+    "What would happen if Earth started to spin faster?",
     "What are some fake-science headlines that reappear regularly? (May 15, 2024)",
     "How can glass produce glare without reflecting light? (April 19, 2024)",
     "Why is the speed of light a random finite number? (February 7, 2024)",
@@ -307,6 +320,7 @@ Questions = {
   ],
 
   "Society": [
+    "What can happen to earth without people?", 
     "Do scientists have a hard time understanding art?",
     "How can I find accurate science information on the internet?",
     "How can I tell whether my friend's scientific explanation is accurate?",
@@ -338,6 +352,8 @@ Questions = {
   ],
 
   "Space": [
+    "What would happen if the earth spun backward?",
+    "What is the universe made of", 
     "Are there different types of black holes?",
     "Can a star turn into a planet?",
     "Can gravity form waves?",

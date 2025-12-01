@@ -7,8 +7,10 @@ BairdScienceQA/
 ├── src/                        # Source code
 │   ├── __init__.py            # Package initialization
 │   ├── bairdqa.py             # Core module (shared utilities)
-│   ├── bairdqa_cli.py         # Command-line interface
-│   └── bairdqa_sl.py          # Streamlit web interface
+│   └── app/                   # Applications (CLI & Web)
+│       ├── __init__.py
+│       ├── bairdqa_cli.py     # Command-line interface
+│       └── bairdqa_sl.py      # Streamlit web interface
 │
 ├── data/                       # Data files
 │   └── questions.json         # Question database
@@ -25,8 +27,7 @@ BairdScienceQA/
 │
 ├── requirements.txt            # Python dependencies
 ├── Makefile                    # Development commands
-├── .gitignore                  # Git ignore rules
-└── README.md                   # Root README (symlink/copy to docs/README.md)
+└── .gitignore                  # Git ignore rules
 ```
 
 ## Module Descriptions
@@ -36,13 +37,13 @@ BairdScienceQA/
 
 **Functions**:
 - `load_questions(file_path)` - Load questions from JSON
-- `get_llm_response(question, model)` - Query LLM via litellm (single entry point)
+- `ask_llm(question, model)` - Ask LLM a question via litellm (single entry point)
 - `save_results(data, file_path)` - Save results to JSON
 - `process_subject(questions_data, subject)` - Generator for batch processing
 
-**Key Feature**: All LLM interactions go through `get_llm_response()` using litellm only
+**Key Feature**: All LLM interactions go through `ask_llm()` using litellm only
 
-### src/bairdqa_cli.py (CLI Interface)
+### src/app/bairdqa_cli.py (CLI Interface)
 **Purpose**: Command-line tool for batch processing questions
 
 **Key Functions**:
@@ -51,10 +52,10 @@ BairdScienceQA/
 
 **Usage**:
 ```bash
-python src/bairdqa_cli.py
+python src/app/bairdqa_cli.py
 ```
 
-### src/bairdqa_sl.py (Web UI)
+### src/app/bairdqa_sl.py (Web UI)
 **Purpose**: Streamlit-based interactive web interface
 
 **Key Functions**:
@@ -66,7 +67,7 @@ python src/bairdqa_cli.py
 
 **Usage**:
 ```bash
-streamlit run src/bairdqa_sl.py
+streamlit run src/app/bairdqa_sl.py
 ```
 
 ## Data Files
@@ -136,7 +137,7 @@ make clean         # Clean generated files
 ```python
 from bairdqa import (
     load_questions,
-    get_llm_response,
+    ask_llm,
     save_results
 )
 ```

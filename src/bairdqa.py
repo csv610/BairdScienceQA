@@ -12,8 +12,8 @@ def load_questions(file_path='questions.json'):
         return json.load(f)
 
 
-def get_llm_response(question, model='gemini-2.5-flash'):
-    """Get response from LLM using litellm"""
+def ask_llm(question, model='gemini-2.5-flash'):
+    """Ask LLM a question using litellm"""
     response = completion(
         model=model,
         messages=[{"role": "user", "content": question}]
@@ -32,7 +32,7 @@ def process_subject(questions_data, subject):
     results = []
     questions = questions_data[subject]
     for i, question in enumerate(questions, 1):
-        answer = get_llm_response(question)
+        answer = ask_llm(question)
         results.append({"question": question, "answer": answer})
         yield i, len(questions), question, answer
     return results

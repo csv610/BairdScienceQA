@@ -24,10 +24,10 @@ test-cov:
 	pytest tests/ --cov=. --cov-report=html
 
 format:
-	black src/*.py tests/
+	black src/*.py src/app/*.py tests/
 
 lint:
-	pylint src/*.py
+	pylint src/*.py src/app/*.py
 
 clean:
 	rm -f *.mp3 *.pyc
@@ -35,7 +35,7 @@ clean:
 	find . -type d -name __pycache__ -exec rm -rf {} + 2>/dev/null || true
 
 run-streamlit:
-	streamlit run src/bairdqa_sl.py
+	streamlit run src/app/bairdqa_sl.py
 
 run-cli:
-	python src/bairdqa_cli.py
+	python src/app/bairdqa_cli.py

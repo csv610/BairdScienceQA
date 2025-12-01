@@ -7,9 +7,9 @@ import vlc
 import streamlit as st
 
 # Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from bairdqa import load_questions as load_questions_util, get_llm_response
+from bairdqa import load_questions as load_questions_util, ask_llm
 
 # Cache the questions loading for Streamlit
 @st.cache_data
@@ -96,7 +96,7 @@ def main():
         # Create an "Ask LLM" button for the selected question
         if st.button("Ask LLM"):
             with st.spinner("Generating answer..."):  # Start spinner
-                st.session_state.answer = get_llm_response(st.session_state.question, model_name)  # Store answer in session state
+                st.session_state.answer = ask_llm(st.session_state.question, model_name)  # Store answer in session state
     
     # Create a "Speak Answer" button for the generated answer
     if st.session_state.answer is not None:

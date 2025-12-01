@@ -49,7 +49,7 @@ BairdScienceQA is a well-structured project with two interfaces (Streamlit web U
 
 **Functions**:
 - `load_questions()` - Load questions from JSON (used by both CLI and web)
-- `get_llm_response()` - Query LLM via litellm (unified API, single point of control)
+- `ask_llm()` - Ask LLM a question via litellm (unified API, single point of control)
 - `save_results()` - Save results to JSON (reusable)
 - `process_subject()` - Generator function for processing questions
 

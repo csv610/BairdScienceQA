@@ -8,9 +8,9 @@ import sys
 import os
 
 # Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from bairdqa import load_questions, get_llm_response, save_results
+from bairdqa import load_questions, ask_llm, save_results
 
 
 def process_and_display(questions, subject, model='gemini-2.5-flash'):
@@ -22,7 +22,7 @@ def process_and_display(questions, subject, model='gemini-2.5-flash'):
 
     for i, question in enumerate(questions, 1):
         print(f"\n[{i}/{len(questions)}] Q: {question}")
-        answer = get_llm_response(question, model)
+        answer = ask_llm(question, model)
         print(f"A: {answer}")
         results.append({"question": question, "answer": answer})
 

@@ -1,10 +1,16 @@
 import random
 import os
 import sys
+import logging
+from pathlib import Path
 
 from gtts import gTTS
 import vlc
 import streamlit as st
+
+# Setup logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -12,100 +18,209 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from bairdqa import load_questions as load_questions_util
 from llm import ask_llm
 
-# Cache the questions loading for Streamlit
+# Constants
+MODELS = ['gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
+DEFAULT_MODEL = MODELS[0]
+AUDIO_FILE = 'answer.mp3'
+
+
 @st.cache_data
 def load_questions():
-    return load_questions_util('../data/questions.json')
+    """Load questions from data directory"""
+    base_dir = Path(__file__).parent.parent.parent
+    questions_path = base_dir / 'data' / 'questions.json'
+    return load_questions_util(str(questions_path))
 
-def initialize_remaining_questions(num_questions):
-    """Initialize a set of remaining question indices."""
-    return set(range(num_questions))
 
-def generate_new_question(questions, remaining_questions):
-    """Generate a new question from the remaining questions."""
-    if remaining_questions:
-        # Select a random index from the remaining questions
-        random_index = random.choice(list(remaining_questions))
-        selected_question = questions[random_index]  # Select the question using the random index
-        
-        # Remove the index from the remaining questions
-        remaining_questions.remove(random_index)
-        
-        return selected_question  
-    else:
+def initialize_session_state():
+    """Initialize all session state variables"""
+    if 'question' not in st.session_state:
+        st.session_state.question = None
+    if 'answer' not in st.session_state:
+        st.session_state.answer = None
+    if 'subject' not in st.session_state:
+        st.session_state.subject = None
+    if 'remaining_questions' not in st.session_state:
+        st.session_state.remaining_questions = None
+
+
+def generate_new_question(questions):
+    """Generate a new question from the remaining questions.
+
+    Args:
+        questions: List of all questions for the subject
+
+    Returns:
+        A new question or None if no questions remain
+    """
+    if not st.session_state.remaining_questions:
         return None
 
-def text_to_speech(text: str):
-    """Convert text to speech and play it using VLC."""
-    if not text:  # Check if the text is empty
-        raise ValueError("Text cannot be empty.")
-    
-    tts = gTTS(text=text, lang='en')
-    tts.save("answer.mp3")
-    
-    # Play the audio using VLC
-    player = vlc.MediaPlayer("answer.mp3")
-    player.play()
+    if not st.session_state.remaining_questions:
+        return None
+
+    random_index = random.choice(list(st.session_state.remaining_questions))
+    selected_question = questions[random_index]
+    st.session_state.remaining_questions.remove(random_index)
+
+    return selected_question
+
+
+def text_to_speech(text):
+    """Convert text to speech and play it using VLC.
+
+    Args:
+        text: Text to convert to speech
+
+    Raises:
+        ValueError: If text is empty
+        RuntimeError: If audio generation or playback fails
+    """
+    if not text or not text.strip():
+        raise ValueError("Text cannot be empty")
+
+    try:
+        logger.info("Generating speech...")
+        tts = gTTS(text=text, lang='en')
+        tts.save(AUDIO_FILE)
+        logger.info(f"Speech saved to {AUDIO_FILE}")
+
+        logger.info("Playing audio...")
+        player = vlc.MediaPlayer(AUDIO_FILE)
+        player.play()
+
+    except FileNotFoundError as e:
+        logger.error(f"Audio file not found: {e}")
+        raise RuntimeError(f"Failed to save audio: {str(e)}") from e
+    except Exception as e:
+        logger.error(f"Error in text-to-speech: {e}")
+        raise RuntimeError(f"Failed to play audio: {str(e)}") from e
+
 
 def reset_questions():
     """Reset the question and answer in session state."""
-    st.session_state.question = None  # Reset question in session state
-    st.session_state.answer = None  # Reset answer in session state
+    st.session_state.question = None
+    st.session_state.answer = None
+    st.session_state.remaining_questions = None
+
 
 def main():
-    st.sidebar.title("Science Questions")
-    # Initialize a list to keep track of asked questions
+    """Main Streamlit application"""
+    initialize_session_state()
 
-    asked_questions = []
-    if 'question' not in st.session_state:
-        st.session_state.question = None  # Initialize question in session state
-    if 'answer' not in st.session_state:
-        st.session_state.answer = None  # Initialize answer in session state
+    st.set_page_config(page_title="BairdScienceQA", layout="wide")
+    st.title("Science Q&A with LLM")
 
-    model_names = ['gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
-    model_name = st.sidebar.selectbox('Select a model', model_names)
+    # Sidebar controls
+    with st.sidebar:
+        st.title("Controls")
 
-    # Display questions for the selected subject
-    questions = load_questions()
+        # Model selection
+        model_name = st.selectbox(
+            'Select a model',
+            MODELS,
+            index=MODELS.index(DEFAULT_MODEL),
+            help="Choose the LLM model to use"
+        )
 
-    subjects = questions.keys()  # Load subjects for the selectbox
-    subject = st.sidebar.selectbox("Choose a subject", subjects, key='subject', on_change=reset_questions)
+        # Load questions
+        try:
+            questions_data = load_questions()
+        except Exception as e:
+            st.error(f"Failed to load questions: {str(e)}")
+            logger.error(f"Error loading questions: {e}")
+            return
 
-    questions = questions[subject]
+        subjects = list(questions_data.keys())
+        if not subjects:
+            st.error("No subjects found in questions file")
+            return
 
-    st.sidebar.write(f"Total questions: {len(questions)}")
+        # Subject selection
+        if st.session_state.subject not in subjects:
+            st.session_state.subject = subjects[0]
 
-    # Initialize the remaining questions set
-    remaining_questions = initialize_remaining_questions(len(questions))
+        subject = st.selectbox(
+            "Choose a subject",
+            subjects,
+            index=subjects.index(st.session_state.subject),
+            on_change=reset_questions,
+            help="Select a science subject"
+        )
 
-    # Add a button to generate a new random question
-    if st.sidebar.button("New Question"):
-        st.session_state.question = generate_new_question(questions, remaining_questions)  # Store in session state
-        if st.session_state.question:
-            st.session_state.answer = None  # Reset answer when a new question is generated
-        else:
-            st.write("No more questions available.")
-            # Ask the user if they want to start over
-            if st.button("Start Over"):
-                remaining_questions = initialize_remaining_questions(len(questions))  # Reset remaining questions
-                st.write("You can start asking questions again!")
+        if subject != st.session_state.subject:
+            st.session_state.subject = subject
+            reset_questions()
 
-    # Display the current question if it exists
-    if st.session_state.question is not None:
-        st.write(f"**Question:** {st.session_state.question}")
+        questions = questions_data[subject]
+        st.write(f"**Total questions:** {len(questions)}")
 
-        # Create an "Ask LLM" button for the selected question
-        if st.button("Ask LLM"):
-            with st.spinner("Generating answer..."):  # Start spinner
-                st.session_state.answer = ask_llm(st.session_state.question, model_name)  # Store answer in session state
-    
-    # Create a "Speak Answer" button for the generated answer
-    if st.session_state.answer is not None:
-        st.write(f"**Answer:** {st.session_state.answer}")  # Ensure the answer is displayed
-        if st.button("Speak Answer"):
-            with st.spinner("Playing answer..."):  # Start spinner
-                text_to_speech(st.session_state.answer)
-    
+        # Initialize remaining questions if needed
+        if st.session_state.remaining_questions is None:
+            st.session_state.remaining_questions = set(range(len(questions)))
+
+        remaining_count = len(st.session_state.remaining_questions)
+        st.write(f"**Remaining:** {remaining_count}")
+
+        # New question button
+        if st.button("🆕 New Question", use_container_width=True):
+            st.session_state.question = generate_new_question(questions)
+            if st.session_state.question:
+                st.session_state.answer = None
+            else:
+                st.warning("No more questions available!")
+
+    # Main content area
+    if st.session_state.question is None:
+        st.info("Click 'New Question' to get started!")
+    else:
+        # Display question
+        st.subheader("Question")
+        st.write(st.session_state.question)
+
+        # Ask LLM button
+        col1, col2 = st.columns(2)
+        with col1:
+            if st.button("🤖 Ask LLM", use_container_width=True):
+                try:
+                    with st.spinner("Generating answer..."):
+                        st.session_state.answer = ask_llm(
+                            st.session_state.question,
+                            model_name
+                        )
+                    st.success("Got answer!")
+                except ValueError as e:
+                    st.error(f"Invalid input: {str(e)}")
+                    logger.error(f"Validation error: {e}")
+                except RuntimeError as e:
+                    st.error(f"LLM error: {str(e)}")
+                    logger.error(f"LLM error: {e}")
+                except Exception as e:
+                    st.error(f"Unexpected error: {str(e)}")
+                    logger.error(f"Unexpected error: {e}")
+
+        # Display answer if available
+        if st.session_state.answer is not None:
+            st.subheader("Answer")
+            st.write(st.session_state.answer)
+
+            with col2:
+                if st.button("🔊 Speak Answer", use_container_width=True):
+                    try:
+                        with st.spinner("Playing answer..."):
+                            text_to_speech(st.session_state.answer)
+                        st.success("Playing audio!")
+                    except ValueError as e:
+                        st.error(f"Invalid input: {str(e)}")
+                        logger.error(f"Validation error: {e}")
+                    except RuntimeError as e:
+                        st.error(f"Audio error: {str(e)}")
+                        logger.error(f"Audio error: {e}")
+                    except Exception as e:
+                        st.error(f"Unexpected error: {str(e)}")
+                        logger.error(f"Unexpected error: {e}")
+
+
 if __name__ == "__main__":
     main()
 

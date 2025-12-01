@@ -1,22 +1,20 @@
-import json
-import os
 import random
+import os
+import sys
 
 from gtts import gTTS
 import vlc
 import streamlit as st
-from llama_model import LlamaModel
 
-# Load questions from a JSON file
+# Add parent directory to path for imports
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+
+from bairdqa import load_questions as load_questions_util, get_llm_response
+
+# Cache the questions loading for Streamlit
 @st.cache_data
 def load_questions():
-    with open('questions.json', 'r') as f:
-        questions = json.load(f)
-    return questions
-    
-@st.cache_data
-def get_llm_model(model_name):
-    return LlamaModel(model_name)
+    return load_questions_util('../data/questions.json')
 
 def initialize_remaining_questions(num_questions):
     """Initialize a set of remaining question indices."""
@@ -63,20 +61,18 @@ def main():
     if 'answer' not in st.session_state:
         st.session_state.answer = None  # Initialize answer in session state
 
-    model_names = ['llama3.2', 'llama3.1', 'gemma2']
+    model_names = ['gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
     model_name = st.sidebar.selectbox('Select a model', model_names)
 
     # Display questions for the selected subject
     questions = load_questions()
-     
+
     subjects = questions.keys()  # Load subjects for the selectbox
     subject = st.sidebar.selectbox("Choose a subject", subjects, key='subject', on_change=reset_questions)
 
     questions = questions[subject]
 
     st.sidebar.write(f"Total questions: {len(questions)}")
-
-    llm = get_llm_model(model_name)
 
     # Initialize the remaining questions set
     remaining_questions = initialize_remaining_questions(len(questions))
@@ -100,7 +96,7 @@ def main():
         # Create an "Ask LLM" button for the selected question
         if st.button("Ask LLM"):
             with st.spinner("Generating answer..."):  # Start spinner
-                st.session_state.answer = llm.get_response(st.session_state.question)  # Store answer in session state
+                st.session_state.answer = get_llm_response(st.session_state.question, model_name)  # Store answer in session state
     
     # Create a "Speak Answer" button for the generated answer
     if st.session_state.answer is not None:

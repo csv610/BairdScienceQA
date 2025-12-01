@@ -1,0 +1,5 @@
+litellm==1.52.7
+gTTS==2.5.1
+streamlit==1.40.0
+vlc==3.0.20125
+pytest==7.4.4

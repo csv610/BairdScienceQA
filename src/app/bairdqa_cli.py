@@ -10,7 +10,8 @@ import os
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from bairdqa import load_questions, ask_llm, save_results
+from bairdqa import load_questions, save_results
+from llm import ask_llm
 
 
 def process_and_display(questions, subject, model='gemini-2.5-flash'):

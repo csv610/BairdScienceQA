@@ -6,7 +6,8 @@
 BairdScienceQA/
 ├── src/                        # Source code
 │   ├── __init__.py            # Package initialization
-│   ├── bairdqa.py             # Core module (shared utilities)
+│   ├── bairdqa.py             # Core module (utilities)
+│   ├── llm.py                 # LLM functions (ask_llm)
 │   └── app/                   # Applications (CLI & Web)
 │       ├── __init__.py
 │       ├── bairdqa_cli.py     # Command-line interface
@@ -33,15 +34,20 @@ BairdScienceQA/
 ## Module Descriptions
 
 ### src/bairdqa.py (Core Module)
-**Purpose**: Shared utilities for all interfaces
+**Purpose**: Shared utilities for questions and results
 
 **Functions**:
 - `load_questions(file_path)` - Load questions from JSON
-- `ask_llm(question, model)` - Ask LLM a question via litellm (single entry point)
 - `save_results(data, file_path)` - Save results to JSON
 - `process_subject(questions_data, subject)` - Generator for batch processing
 
-**Key Feature**: All LLM interactions go through `ask_llm()` using litellm only
+### src/llm.py (LLM Module)
+**Purpose**: All LLM-related functions
+
+**Functions**:
+- `ask_llm(question, model)` - Ask LLM a question via litellm (single entry point)
+
+**Key Feature**: Single source of truth for all LLM interactions using litellm only
 
 ### src/app/bairdqa_cli.py (CLI Interface)
 **Purpose**: Command-line tool for batch processing questions
@@ -135,11 +141,8 @@ make clean         # Clean generated files
 
 ### From CLI/Web Interface
 ```python
-from bairdqa import (
-    load_questions,
-    ask_llm,
-    save_results
-)
+from bairdqa import load_questions, save_results
+from llm import ask_llm
 ```
 
 ### From Tests
@@ -168,34 +171,37 @@ All applications reference files relative to their location:
 ## Architecture Diagram
 
 ```
-┌─────────────────────────────────┐
-│      bairdqa.py (Core)          │
-│  • load_questions()             │
-│  • get_llm_response()           │
-│  • save_results()               │
-└────────────┬────────────────────┘
-             │
-     ┌───────┴───────┐
-     │               │
-┌────▼────┐  ┌──────▼──────┐
+┌──────────────────────────┐
+│   bairdqa.py (Core)      │
+│  • load_questions()      │
+│  • save_results()        │
+│  • process_subject()     │
+└────────┬─────────────────┘
+         │
+    ┌────▼──────────┐
+    │   llm.py      │
+    │  • ask_llm()  │  ← Single LLM Entry Point
+    └────┬──────────┘
+         │
+     ┌───┴───────┐
+     │           │
+┌────▼────┐  ┌──▼──────────┐
 │ CLI App │  │ Streamlit   │
 │         │  │   Web UI    │
-└────┬────┘  └──────┬──────┘
-     │               │
-     │    ↓ imports  │
-     │               │
-     └───┬───────────┘
-         │
-    ┌────▼──────┐
-    │  litellm  │  ← Single LLM Framework
-    └───────────┘
-         │
-    ┌────▼──────────────────┐
-    │  LLM Providers        │
-    │  • Gemini 2.5 Flash   │
-    │  • GPT-4              │
-    │  • Claude-3 Sonnet    │
-    └───────────────────────┘
+└─────────┘  └─────────────┘
+     │           │
+     └─────┬─────┘
+           │
+      ┌────▼────────┐
+      │   litellm   │  ← Unified LLM API
+      └────┬────────┘
+           │
+      ┌────▼──────────────────┐
+      │   LLM Providers       │
+      │ • Gemini 2.5 Flash    │
+      │ • GPT-4               │
+      │ • Claude-3 Sonnet     │
+      └───────────────────────┘
 ```
 
 ## Conclusion

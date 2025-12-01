@@ -9,7 +9,8 @@ import streamlit as st
 # Add parent directory to path for imports
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from bairdqa import load_questions as load_questions_util, ask_llm
+from bairdqa import load_questions as load_questions_util
+from llm import ask_llm
 
 # Cache the questions loading for Streamlit
 @st.cache_data

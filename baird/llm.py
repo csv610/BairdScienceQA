@@ -29,7 +29,8 @@ def ask_llm(question, model='gemini-2.5-flash'):
         logger.debug(f"Asking {model}: {question[:50]}...")
         response = completion(
             model=model,
-            messages=[{"role": "user", "content": question}]
+            messages=[{"role": "user", "content": question}],
+            timeout=60
         )
 
         if not response or not response.choices:

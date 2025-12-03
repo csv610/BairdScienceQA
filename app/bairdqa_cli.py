@@ -128,6 +128,7 @@ def main():
         if choice == 'all':
             logger.info("Processing all subjects")
             all_results = {}
+            failed_subjects = []
             for subject in subjects:
                 try:
                     results = process_and_display(questions_data[subject], subject)
@@ -136,12 +137,17 @@ def main():
                 except Exception as e:
                     logger.error(f"Failed to process {subject}: {e}")
                     print(f"❌ Failed to process {subject}")
-                    sys.exit(1)
+                    failed_subjects.append(subject)
 
-            output_file = 'all_answers.json'
-            logger.info(f"Saving results to {output_file}")
-            save_results(all_results, output_file)
-            print(f"\n✅ All results saved to {output_file}")
+            if all_results:
+                output_file = 'all_answers.json'
+                logger.info(f"Saving results to {output_file}")
+                save_results(all_results, output_file)
+                print(f"\n✅ Results saved to {output_file} ({len(all_results)}/{len(subjects)} subjects)")
+
+            if failed_subjects:
+                print(f"\n⚠️  Failed to process {len(failed_subjects)} subject(s): {', '.join(failed_subjects)}")
+                sys.exit(1)
 
         else:
             logger.info(f"Processing subject: {choice}")

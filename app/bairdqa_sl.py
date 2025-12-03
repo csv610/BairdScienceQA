@@ -56,9 +56,6 @@ def generate_new_question(questions):
     if not st.session_state.remaining_questions:
         return None
 
-    if not st.session_state.remaining_questions:
-        return None
-
     random_index = random.choice(list(st.session_state.remaining_questions))
     selected_question = questions[random_index]
     st.session_state.remaining_questions.remove(random_index)
@@ -95,6 +92,14 @@ def text_to_speech(text):
     except Exception as e:
         logger.error(f"Error in text-to-speech: {e}")
         raise RuntimeError(f"Failed to play audio: {str(e)}") from e
+    finally:
+        # Clean up audio file after playback
+        try:
+            if Path(AUDIO_FILE).exists():
+                Path(AUDIO_FILE).unlink()
+                logger.debug(f"Cleaned up {AUDIO_FILE}")
+        except Exception as e:
+            logger.warning(f"Failed to clean up audio file: {e}")
 
 
 def reset_questions():

@@ -5,7 +5,7 @@ Shared utilities for BairdScienceQA
 import json
 import logging
 from pathlib import Path
-from llm import ask_llm
+from .llm import ask_llm
 
 logger = logging.getLogger(__name__)
 
@@ -93,32 +93,3 @@ def save_results(data, file_path):
         raise IOError(f"Failed to save results: {str(e)}") from e
 
 
-def process_subject(questions_data, subject):
-    """Process all questions for a subject
-
-    Args:
-        questions_data: Dictionary of subjects and questions
-        subject: Subject to process
-
-    Yields:
-        Tuple of (index, total, question, answer)
-
-    Raises:
-        KeyError: If subject not found
-        RuntimeError: If LLM call fails
-    """
-    if subject not in questions_data:
-        logger.error(f"Subject not found: {subject}")
-        raise KeyError(f"Subject not found: {subject}")
-
-    questions = questions_data[subject]
-    results = []
-
-    for i, question in enumerate(questions, 1):
-        try:
-            answer = ask_llm(question)
-            results.append({"question": question, "answer": answer})
-            yield i, len(questions), question, answer
-        except Exception as e:
-            logger.error(f"Error processing question {i}: {e}")
-            raise RuntimeError(f"Error processing question {i}: {str(e)}") from e

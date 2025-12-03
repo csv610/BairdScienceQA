@@ -5,7 +5,11 @@ Shared utilities for BairdScienceQA
 import json
 import logging
 from pathlib import Path
-from .llm import ask_llm
+
+try:
+    from .llm import ask_llm
+except ImportError:
+    from llm import ask_llm
 
 logger = logging.getLogger(__name__)
 

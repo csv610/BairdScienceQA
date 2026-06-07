@@ -13,13 +13,13 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Add parent directory to path for imports
-sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from bairdqa import load_questions as load_questions_util
-from llm import ask_llm
+from baird.bairdqa import load_questions as load_questions_util
+from baird.llm import ask_llm
 
 # Constants
-MODELS = ['gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
+MODELS = ['ollama/gemma3', 'ollama/gemma4', 'gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
 DEFAULT_MODEL = MODELS[0]
 AUDIO_FILE = 'answer.mp3'
 

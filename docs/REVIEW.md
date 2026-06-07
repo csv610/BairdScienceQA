@@ -13,10 +13,10 @@ The codebase demonstrates good organization, clean separation of concerns, and i
 ### ✅ Strengths
 
 #### Module Organization (Excellent)
-- **src/llm.py**: Single responsibility - 14 lines, pure LLM interface
-- **src/bairdqa.py**: Focused utilities - 29 lines, only core functions
-- **src/app/bairdqa_cli.py**: Clean CLI - 67 lines, straightforward flow
-- **src/app/bairdqa_sl.py**: Streamlit UI - organized and readable
+- **baird/llm.py**: Single responsibility - 60 lines, pure LLM interface
+- **baird/bairdqa.py**: Focused utilities - 276 lines, core functions
+- **app/bairdqa_cli.py**: Clean CLI - 334 lines, straightforward flow
+- **app/bairdqa_sl.py**: Streamlit UI - organized and readable
 - **Total Core Code**: ~150 lines (excluding UI) ✅
 
 #### Code Readability
@@ -71,7 +71,7 @@ def process_subject(...):
 
 ### 🔴 Critical Issues
 
-#### 1. No Error Handling for LLM API (src/llm.py:8-14)
+#### 1. No Error Handling for LLM API (baird/llm.py:8-14)
 ```python
 def ask_llm(question, model='gemini-2.5-flash'):
     response = completion(...)
@@ -86,7 +86,7 @@ def ask_llm(question, model='gemini-2.5-flash'):
 
 **Impact**: High - Application crashes on API errors
 
-#### 2. No File Path Validation (src/bairdqa.py:9-12)
+#### 2. No File Path Validation (baird/bairdqa.py:9-12)
 ```python
 def load_questions(file_path='questions.json'):
     with open(file_path, 'r') as f:
@@ -101,7 +101,7 @@ def load_questions(file_path='questions.json'):
 
 **Impact**: High - Crashes with unclear error messages
 
-#### 3. No Input Validation (src/app/bairdqa_cli.py:42)
+#### 3. No Input Validation (app/bairdqa_cli.py:42)
 ```python
 choice = input().strip()
 # ... later ...
@@ -116,7 +116,7 @@ subject = subjects[idx]  # Silent failure if out of range
 
 **Impact**: Medium - Unexpected behavior
 
-#### 4. Silent Data Loss Risk (src/bairdqa_sl.py:79-90)
+#### 4. Silent Data Loss Risk (app/bairdqa_sl.py:79-90)
 ```python
 remaining_questions = initialize_remaining_questions(len(questions))
 # Button modifies local variable, but session state not updated
@@ -265,7 +265,7 @@ def process_subject(questions_data, subject):
 
 #### 2b. Extract Constants
 ```python
-# In src/config.py or at top of each file
+# In a config module or at top of each file
 MODELS = ['gemini-2.5-flash', 'gpt-4', 'claude-3-sonnet']
 DEFAULT_MODEL = 'gemini-2.5-flash'
 DATA_DIR = 'data'

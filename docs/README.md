@@ -40,7 +40,7 @@ export GEMINI_API_KEY="your-api-key"
 
 Run the interactive web application:
 ```bash
-streamlit run src/app/bairdqa_sl.py
+streamlit run app/bairdqa_sl.py
 ```
 
 Then open your browser to `http://localhost:8501`
@@ -56,7 +56,7 @@ Features:
 
 Run the command-line interface to process questions:
 ```bash
-python src/app/bairdqa_cli.py
+python app/bairdqa_cli.py
 ```
 
 Features:
@@ -69,13 +69,14 @@ Features:
 
 ```
 BairdScienceQA/
-├── src/
+├── baird/
 │   ├── bairdqa.py              # Core module (shared utilities)
-│   ├── __init__.py
-│   └── app/
-│       ├── bairdqa_sl.py       # Streamlit web application
-│       ├── bairdqa_cli.py      # Command-line interface
-│       └── __init__.py
+│   ├── llm.py                  # LLM interaction (litellm)
+│   └── __init__.py
+├── app/
+│   ├── bairdqa_cli.py          # Command-line interface
+│   ├── bairdqa_sl.py           # Streamlit web application
+│   └── __init__.py
 ├── data/
 │   └── questions.json          # Question database
 ├── tests/
@@ -137,7 +138,7 @@ pytest tests/
 ```bash
 make format
 # or
-black src/ tests/
+black baird/ app/ tests/
 ```
 
 ### Install development dependencies

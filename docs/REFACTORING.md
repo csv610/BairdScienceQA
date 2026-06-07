@@ -5,7 +5,7 @@ Refactored the BairdScienceQA project to eliminate code duplication between CLI 
 
 ## Changes Made
 
-### 1. Created `bairdqa.py` (New File)
+### 1. Created `baird/bairdqa.py` (New File)
 **Purpose**: Core module with shared functions used by both CLI and web interfaces
 
 **Functions**:
@@ -50,7 +50,7 @@ Saved:  20 lines (-25%)
 **After**: Uses shared utilities
 
 **Changes**:
-- Imported `load_questions` and `get_llm_response` from utils
+- Imported `load_questions` and `ask_llm` from `baird` package
 - Wrapped shared `load_questions()` with Streamlit cache decorator
 - Removed duplicate litellm API logic
 - Cleaner imports section

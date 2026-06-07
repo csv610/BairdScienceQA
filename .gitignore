@@ -56,4 +56,5 @@ htmlcov/
 
 # Generated answers
 *_answers.json
+*_answers.md
 all_answers.json

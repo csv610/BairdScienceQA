@@ -6,10 +6,11 @@ BairdScienceQA is a well-structured project with two interfaces (Streamlit web U
 ## Project Structure
 
 ```
-├── bairdqa_cli.py           - CLI interface (61 lines)
-├── bairdqa_sl.py            - Streamlit web interface (104 lines)
-├── bairdqa.py               - Core module with shared functions (38 lines)
-├── questions.json           - Question database
+├── app/bairdqa_cli.py       - CLI interface
+├── app/bairdqa_sl.py        - Streamlit web interface
+├── baird/bairdqa.py         - Core module with shared functions
+├── baird/llm.py             - LLM interaction via litellm
+├── data/questions.json      - Question database
 ├── requirements.txt         - Python dependencies
 ├── Makefile                 - Development commands
 ├── tests/                   - Unit test suite
@@ -212,6 +213,6 @@ The codebase is well-organized, documented, and functional. The project successf
 
 ### Ready for Use ✅
 - Install: `pip install -r requirements.txt`
-- CLI: `python bairdqa_cli.py`
-- Web: `streamlit run sl_BairdScienceQA.py`
+- CLI: `python app/bairdqa_cli.py`
+- Web: `streamlit run app/bairdqa_sl.py`
 - Tests: `pytest tests/`

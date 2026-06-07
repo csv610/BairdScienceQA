@@ -4,14 +4,15 @@
 
 ```
 BairdScienceQA/
-├── src/                        # Source code
+├── baird/                      # Core modules
 │   ├── __init__.py            # Package initialization
 │   ├── bairdqa.py             # Core module (utilities)
-│   ├── llm.py                 # LLM functions (ask_llm)
-│   └── app/                   # Applications (CLI & Web)
-│       ├── __init__.py
-│       ├── bairdqa_cli.py     # Command-line interface
-│       └── bairdqa_sl.py      # Streamlit web interface
+│   └── llm.py                 # LLM functions (ask_llm)
+│
+├── app/                        # Applications (CLI & Web)
+│   ├── __init__.py
+│   ├── bairdqa_cli.py         # Command-line interface
+│   └── bairdqa_sl.py          # Streamlit web interface
 │
 ├── data/                       # Data files
 │   └── questions.json         # Question database
@@ -33,7 +34,7 @@ BairdScienceQA/
 
 ## Module Descriptions
 
-### src/bairdqa.py (Core Module)
+### baird/bairdqa.py (Core Module)
 **Purpose**: Shared utilities for questions and results
 
 **Functions**:
@@ -41,7 +42,7 @@ BairdScienceQA/
 - `save_results(data, file_path)` - Save results to JSON
 - `process_subject(questions_data, subject)` - Generator for batch processing
 
-### src/llm.py (LLM Module)
+### baird/llm.py (LLM Module)
 **Purpose**: All LLM-related functions
 
 **Functions**:
@@ -49,7 +50,7 @@ BairdScienceQA/
 
 **Key Feature**: Single source of truth for all LLM interactions using litellm only
 
-### src/app/bairdqa_cli.py (CLI Interface)
+### app/bairdqa_cli.py (CLI Interface)
 **Purpose**: Command-line tool for batch processing questions
 
 **Key Functions**:
@@ -58,22 +59,22 @@ BairdScienceQA/
 
 **Usage**:
 ```bash
-python src/app/bairdqa_cli.py
+python app/bairdqa_cli.py
 ```
 
-### src/app/bairdqa_sl.py (Web UI)
+### app/bairdqa_sl.py (Web UI)
 **Purpose**: Streamlit-based interactive web interface
 
 **Key Functions**:
 - `load_questions()` - Cached question loader
-- `initialize_remaining_questions()` - Track question progress
+- `initialize_session_state()` - Track session state
 - `generate_new_question()` - Random question generator
 - `text_to_speech()` - Convert answers to audio
 - `main()` - Streamlit UI entry point
 
 **Usage**:
 ```bash
-streamlit run src/app/bairdqa_sl.py
+streamlit run app/bairdqa_sl.py
 ```
 
 ## Data Files
@@ -120,12 +121,12 @@ pip install -r requirements.txt
 # Web UI
 make run-streamlit
 # or
-streamlit run src/bairdqa_sl.py
+streamlit run app/bairdqa_sl.py
 
 # CLI
 make run-cli
 # or
-python src/bairdqa_cli.py
+python app/bairdqa_cli.py
 ```
 
 ### Development Tasks
@@ -141,13 +142,13 @@ make clean         # Clean generated files
 
 ### From CLI/Web Interface
 ```python
-from bairdqa import load_questions, save_results
-from llm import ask_llm
+from baird.bairdqa import load_questions, save_results, save_results_markdown
+from baird.llm import ask_llm
 ```
 
 ### From Tests
 ```python
-sys.path.insert(0, str(Path(__file__).parent.parent / 'src'))
+sys.path.insert(0, str(Path(__file__).parent.parent / 'baird'))
 from bairdqa import load_questions
 ```
 
@@ -165,21 +166,22 @@ All applications reference files relative to their location:
 
 | File | CLI Path | Web Path |
 |------|----------|----------|
-| questions.json | `../data/questions.json` | `../data/questions.json` |
-| Output files | `current_dir/*.json` | `current_dir/*.json` |
+| questions.json | `data/questions.json` (via `Path(__file__)`) | `data/questions.json` (via `Path(__file__)`) |
+| Output files | `current_dir/*.md` | `current_dir/*.mp3` |
 
 ## Architecture Diagram
 
 ```
-┌──────────────────────────┐
-│   bairdqa.py (Core)      │
+┌─────────────────────────┐
+│   baird/bairdqa.py      │
 │  • load_questions()      │
 │  • save_results()        │
-│  • process_subject()     │
-└────────┬─────────────────┘
+│  • save_results_markdown │
+│  • parse_markdown_results│
+└────────┬────────────────┘
          │
     ┌────▼──────────┐
-    │   llm.py      │
+    │  baird/llm.py │
     │  • ask_llm()  │  ← Single LLM Entry Point
     └────┬──────────┘
          │
@@ -187,7 +189,9 @@ All applications reference files relative to their location:
      │           │
 ┌────▼────┐  ┌──▼──────────┐
 │ CLI App │  │ Streamlit   │
-│         │  │   Web UI    │
+│ app/    │  │   Web UI    │
+│bairdqa_ │  │ app/bairdqa_│
+│ cli.py  │  │  sl.py      │
 └─────────┘  └─────────────┘
      │           │
      └─────┬─────┘
@@ -196,12 +200,13 @@ All applications reference files relative to their location:
       │   litellm   │  ← Unified LLM API
       └────┬────────┘
            │
-      ┌────▼──────────────────┐
-      │   LLM Providers       │
-      │ • Gemini 2.5 Flash    │
-      │ • GPT-4               │
-      │ • Claude-3 Sonnet     │
-      └───────────────────────┘
+      ┌────▼──────────────────────┐
+      │   LLM Providers           │
+      │ • Ollama (gemma3/gemma4)  │
+      │ • Gemini 2.5 Flash        │
+      │ • GPT-4                   │
+      │ • Claude-3 Sonnet         │
+      └───────────────────────────┘
 ```
 
 ## Conclusion

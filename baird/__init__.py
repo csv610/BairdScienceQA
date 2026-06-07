@@ -1,4 +1,12 @@
-"""BairdScienceQA - Science Q&A application using litellm"""
+from .bairdqa import load_questions, save_results, save_results_markdown, load_markdown_results, format_results_as_markdown, parse_markdown_results
+from .llm import ask_llm
 
-__version__ = "1.0.0"
-__author__ = "BairdScienceQA"
+__all__ = [
+    'load_questions',
+    'save_results',
+    'save_results_markdown',
+    'load_markdown_results',
+    'format_results_as_markdown',
+    'parse_markdown_results',
+    'ask_llm',
+]

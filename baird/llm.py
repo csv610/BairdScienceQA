@@ -3,12 +3,16 @@ LLM-related functions using litellm
 """
 
 import logging
+
+# Workaround for litellm logging.NONE issue
+if not hasattr(logging, 'NONE'):
+    logging.NONE = 100  # Add NONE level above CRITICAL
+
 from litellm import completion
 
 logger = logging.getLogger(__name__)
 
-
-def ask_llm(question, model='gemini-2.5-flash'):
+def ask_llm(question, model='ollama/gemma4'):
     """Ask LLM a question using litellm
 
     Args:
